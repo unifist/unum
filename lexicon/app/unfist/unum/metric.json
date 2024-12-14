@@ -1,0 +1,38 @@
+{
+  "lexicon": 1,
+  "id": "app.unifist.unum.metric",
+  "revision": 0,
+  "description": "Stores metrics for an Unum, how to measure goals, the success of an Unum",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "nsid",
+      "record": {
+        "type": "object",
+        "required": ["goal", "location", "value", "description"],
+        "properties": {
+          "goal": {
+            "description": "The goal for this metric",
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef"
+          },
+          "location": {
+            "description": "How to retrieve this metric",
+            "type": "string",
+            "maxLength": "32"
+          },
+          "value": {
+            "description": "The specific value of the metric",
+            "type": "string",
+            "maxLength": "32"
+          },
+          "description": {
+            "type": "string",
+            "maxGraphemes": 256,
+            "maxLength": 1024
+          }
+        }
+      }
+    }
+  }
+}
