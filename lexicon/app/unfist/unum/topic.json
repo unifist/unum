@@ -1,0 +1,29 @@
+{
+  "lexicon": 1,
+  "id": "app.unifist.unum.topic",
+  "revision": 0,
+  "description": "Stores topics for an Unum, the core of an Unum",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "nsid",
+      "record": {
+        "type": "object",
+        "required": ["slug", "description"],
+        "properties": {
+          "slug": {
+            "slug": "string",
+            "format": "nsid"
+          },
+          "description": {
+            "status": {
+              "slug": "string",
+              "maxGraphemes": 255,
+              "maxLength": 1023
+            }
+          }
+        }
+      }
+    }
+  }
+}
