@@ -1,19 +1,23 @@
 {
   "lexicon": 1,
-  "id": "app.unifist.unum.topic",
+  "id": "app.unifist.unum.goal",
   "revision": 0,
-  "description": "Stores topics for an Unum, the core of an Unum",
+  "description": "Stores goals for an Unum, the purpose of an Unum",
   "defs": {
     "main": {
       "type": "record",
       "key": "nsid",
       "record": {
         "type": "object",
-        "required": ["slug", "description"],
+        "required": ["aspect", "change", "description"],
         "properties": {
-          "slug": {
+          "aspect": {
             "type": "string",
-            "format": "nsid"
+            "maxLength": "32"
+          },
+          "change": {
+            "type": "string",
+            "maxLength": "32"
           },
           "description": {
             "status": {
