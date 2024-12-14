@@ -12,15 +12,14 @@
         "required": ["slug", "description"],
         "properties": {
           "slug": {
+            "description": "Computer readable id",
             "type": "string",
             "format": "nsid"
           },
           "description": {
-            "status": {
-              "type": "string",
-              "maxGraphemes": 256,
-              "maxLength": 1024
-            }
+            "type": "string",
+            "maxGraphemes": 256,
+            "maxLength": 1024
           }
         }
       }
