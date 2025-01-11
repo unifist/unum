@@ -1,4 +1,5 @@
 atproto==0.0.56
+gspread==6.1.4
 ptvsd==4.3.2
 coverage==5.2.1
 pylint==2.5.3
