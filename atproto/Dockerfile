@@ -6,8 +6,12 @@ WORKDIR /opt/service
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
-COPY bin bin
+COPY bin .
+COPY lib .
 
-CMD ["/opt/service/bin/run.py"]
+ENV PYTHONPATH="/opt/service/lib:${PYTHONPATH}"
+
+CMD ["/opt/service/bin/bsky.py"]
