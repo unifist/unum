@@ -14,6 +14,12 @@ ENVIRONMENT=-e test="python -m unittest -v " \
 
 .PHONY: build shell post basesheet ohsheet sheetpost hello shouldi draft
 
+zip:
+	zip secret.zip secret/*
+
+unzip:
+	unzip secret.zip
+
 build:
 	docker build . -t $(ACCOUNT)/$(IMAGE):$(VERSION)
 
@@ -30,7 +36,7 @@ ohsheet:
 	docker run $(TTY) $(VOLUMES) $(ENVIRONMENT) $(ACCOUNT)/$(IMAGE):$(VERSION) sh -c "bin/ohsheet.py"
 
 sheetpost:
-	docker run $(TTY) $(VOLUMES) $(ENVIRONMENT) $(ACCOUNT)
+	docker run $(TTY) $(VOLUMES) $(ENVIRONMENT) $(ACCOUNT))/$(IMAGE):$(VERSION) sh -c "bin/sheetpost.py"
 
 hello:
 	docker run $(TTY) $(VOLUMES) $(ENVIRONMENT) $(ACCOUNT)/$(IMAGE):$(VERSION) sh -c "bin/hello.py"
