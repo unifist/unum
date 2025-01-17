@@ -12,7 +12,7 @@ ENVIRONMENT=-e test="python -m unittest -v " \
 			-e PYTHONDONTWRITEBYTECODE=1 \
 			-e PYTHONUNBUFFERED=1
 
-.PHONY: build shell post basesheet ohsheet sheetpost hello shouldi draft
+.PHONY: build shell post basesheet ohsheet sheetpost hello shouldi draft zaft
 
 zip:
 	zip secret.zip secret/*
@@ -47,5 +47,5 @@ shouldi:
 draft:
 	docker run $(TTY) $(VOLUMES) $(ENVIRONMENT) $(ACCOUNT)/$(IMAGE):$(VERSION) sh -c "bin/draft.py"
 
-sheetree:
-	docker run $(TTY) $(VOLUMES) $(ENVIRONMENT) $(ACCOUNT)/$(IMAGE):$(VERSION) sh -c "bin/sheetree.py"
+zaft:
+	docker run $(TTY) $(VOLUMES) $(ENVIRONMENT) $(ACCOUNT)/$(IMAGE):$(VERSION) sh -c "bin/zaft.py"

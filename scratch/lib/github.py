@@ -1,4 +1,5 @@
 import json
+import time
 import requests
 
 class QL:
@@ -29,12 +30,32 @@ class QL:
 
     def graph(self, query):
 
-        response = self.session.post("https://api.github.com/graphql", json={"query": query}).json()
+        retries = 3
 
-        if "data" not in response:
-            self.dump(response)
+        while retries:
 
-        return response["data"]
+            time.sleep(1)
+
+            retries -= 1
+
+            response = self.session.post("https://api.github.com/graphql", json={"query": query})
+
+            body = response.json()
+
+            if "data" in body:
+                return body["data"]
+
+            self.dump(dict(response.headers))
+            self.dump(body)
+
+            until = int(response.headers.get('X-RateLimit-Reset', time.time()))
+            meow = time.time()
+
+            if until > meow:
+                hold = until - meow
+                print("backoff", until, meow, hold)
+                time.sleep(hold)
+
 
     def draft(self, title, body):
 
