@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chakras and the Galaxy Mosaic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0B1E;--bar:#110E26;--line:#2E2A4D;--ink:#F2EEE6;--muted:#A9A3C2;--accent:#C792FF;--panel:#17142E}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}
+body{display:flex;flex-direction:column;overflow:hidden}
+#viewport{flex:1 1 auto;position:relative;overflow:hidden;min-height:0}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none}
+.slide.on{display:block}
+#bar{flex:none;border-top:1px solid var(--line);background:var(--bar)}
+#progress{height:4px;background:#1E1A38;cursor:pointer;position:relative}
+#progress span{position:absolute;left:0;top:0;bottom:0;background:var(--accent);width:0}
+#row{display:flex;align-items:center;gap:20px;padding:12px 20px;flex-wrap:wrap}
+#caption{flex:1 1 420px;min-width:0;font-size:17px;line-height:1.45;max-height:76px;overflow-y:auto}
+#caption.hide{visibility:hidden}
+#ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#count{font-size:14px;color:var(--muted);min-width:64px;text-align:right}
+button,select{height:44px;min-width:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:500 15px Inter,sans-serif;cursor:pointer}
+button.primary{background:var(--accent);color:var(--bg);border:none;font-weight:600;min-width:92px}
+button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(13,11,30,.82);z-index:5}
+#start.gone{display:none}
+#start button{height:64px;padding:0 36px;font-size:20px}
+#start p{margin:0;color:var(--muted);font-size:15px;text-align:center;max-width:420px;padding:0 16px}
+@keyframes draw{0%{stroke-dashoffset:1;opacity:1}60%,86%{stroke-dashoffset:0;opacity:1}96%{stroke-dashoffset:0;opacity:0}100%{stroke-dashoffset:1;opacity:0}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes s0{0%{opacity:.3}4%,86%{opacity:1}94%,100%{opacity:.3}}
+@keyframes s1{0%,8%{opacity:.3}12%,86%{opacity:1}94%,100%{opacity:.3}}
+@keyframes s2{0%,16%{opacity:.3}20%,86%{opacity:1}94%,100%{opacity:.3}}
+@keyframes s3{0%,24%{opacity:.3}28%,86%{opacity:1}94%,100%{opacity:.3}}
+@keyframes s4{0%,32%{opacity:.3}36%,86%{opacity:1}94%,100%{opacity:.3}}
+@keyframes s5{0%,40%{opacity:.3}44%,86%{opacity:1}94%,100%{opacity:.3}}
+@keyframes s6{0%,48%{opacity:.3}52%,86%{opacity:1}94%,100%{opacity:.3}}
+@keyframes seed{0%{transform:scale(.12);opacity:.9}55%,86%{transform:scale(1);opacity:1}96%,100%{transform:scale(1);opacity:0}}
+@keyframes seedDraw{0%,8%{stroke-dashoffset:1}55%,100%{stroke-dashoffset:0}}
+@keyframes seedNode{0%,40%{opacity:0}55%,86%{opacity:1}96%,100%{opacity:0}}
+@keyframes o1a{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes up{0%{transform:translateY(0);opacity:0}4%{opacity:1}42%{transform:translateY(-510px);opacity:1}48%,100%{transform:translateY(-510px);opacity:0}}
+@keyframes down{0%,50%{transform:translateY(0);opacity:0}54%{opacity:1}92%{transform:translateY(510px);opacity:1}98%,100%{transform:translateY(510px);opacity:0}}
+@keyframes upBox{0%,46%{opacity:1}50%,96%{opacity:.4}100%{opacity:1}}
+@keyframes downBox{0%,46%{opacity:.4}50%,96%{opacity:1}100%{opacity:.4}}
+@keyframes flare1{0%{r:24px;opacity:.35}3%{r:44px;opacity:1}9%,100%{r:24px;opacity:.35}}
+@keyframes flare2{0%,4%{r:24px;opacity:.35}7%{r:44px;opacity:1}13%,100%{r:24px;opacity:.35}}
+@keyframes flare3{0%,11%{r:24px;opacity:.35}14%{r:44px;opacity:1}20%,100%{r:24px;opacity:.35}}
+@keyframes flare4{0%,18%{r:24px;opacity:.35}21%{r:44px;opacity:1}27%,100%{r:24px;opacity:.35}}
+@keyframes flare5{0%,25%{r:24px;opacity:.35}28%{r:44px;opacity:1}34%,100%{r:24px;opacity:.35}}
+@keyframes flare6{0%,32%{r:24px;opacity:.35}35%{r:44px;opacity:1}41%,100%{r:24px;opacity:.35}}
+@keyframes flare7{0%,39%{r:24px;opacity:.35}42%{r:44px;opacity:1}46%,100%{r:24px;opacity:.35}}
+@keyframes t0a{0%{opacity:0;transform:translateX(-8px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes q0{0%{opacity:0;transform:translateY(6px)}8%,100%{opacity:1;transform:translateY(0)}}
+@keyframes q1{0%,8%{opacity:0;transform:translateY(6px)}16%,100%{opacity:1;transform:translateY(0)}}
+@keyframes q2{0%,16%{opacity:0;transform:translateY(6px)}24%,100%{opacity:1;transform:translateY(0)}}
+@keyframes q3{0%,24%{opacity:0;transform:translateY(6px)}32%,100%{opacity:1;transform:translateY(0)}}
+@keyframes drawSpiral{0%{stroke-dashoffset:1;opacity:1}60%,86%{stroke-dashoffset:0;opacity:1}94%{stroke-dashoffset:0;opacity:0}100%{stroke-dashoffset:1;opacity:0}}
+@keyframes p0{0%{opacity:.25}2%,86%{opacity:1}94%,100%{opacity:.25}}
+@keyframes p1{0%,2.9%{opacity:.25}5%,86%{opacity:1}94%,100%{opacity:.25}}
+@keyframes p2{0%,8.6%{opacity:.25}10.6%,86%{opacity:1}94%,100%{opacity:.25}}
+@keyframes p3{0%,17.1%{opacity:.25}19.1%,86%{opacity:1}94%,100%{opacity:.25}}
+@keyframes p4{0%,28.6%{opacity:.25}30.6%,86%{opacity:1}94%,100%{opacity:.25}}
+@keyframes p5{0%,42.9%{opacity:.25}44.9%,86%{opacity:1}94%,100%{opacity:.25}}
+@keyframes p6{0%,60%{opacity:.25}62%,86%{opacity:1}94%,100%{opacity:.25}}
+@keyframes bdcSa{0%{stroke-dashoffset:0.2;opacity:0}0.5%{opacity:1}10%{stroke-dashoffset:-1;opacity:1}10.5%,100%{stroke-dashoffset:-1;opacity:0}}
+@keyframes bdcTh{0%,15%{stroke-dashoffset:0.2;opacity:0}15.5%{opacity:1}25%{stroke-dashoffset:-1;opacity:1}25.5%,100%{stroke-dashoffset:-1;opacity:0}}
+@keyframes bdcCr{0%,30%{stroke-dashoffset:0.2;opacity:0}30.5%{opacity:1}40%{stroke-dashoffset:-1;opacity:1}40.5%,100%{stroke-dashoffset:-1;opacity:0}}
+@keyframes bdcSo{0%,45%{stroke-dashoffset:0.2;opacity:0}45.5%{opacity:1}55%{stroke-dashoffset:-1;opacity:1}55.5%,100%{stroke-dashoffset:-1;opacity:0}}
+@keyframes bdcRo{0%,60%{stroke-dashoffset:0.2;opacity:0}60.5%{opacity:1}70%{stroke-dashoffset:-1;opacity:1}70.5%,100%{stroke-dashoffset:-1;opacity:0}}
+@keyframes bdcTe{0%,75%{stroke-dashoffset:0.2;opacity:0}75.5%{opacity:1}85%{stroke-dashoffset:-1;opacity:1}85.5%,100%{stroke-dashoffset:-1;opacity:0}}
+@keyframes bdiSa{0%,12%{opacity:1}16%,98%{opacity:.35}100%{opacity:1}}
+@keyframes bdiTh{0%,15%{opacity:.35}16%,27%{opacity:1}31%,100%{opacity:.35}}
+@keyframes bdiCr{0%,30%{opacity:.35}31%,42%{opacity:1}46%,100%{opacity:.35}}
+@keyframes bdiSo{0%,45%{opacity:.35}46%,57%{opacity:1}61%,100%{opacity:.35}}
+@keyframes bdiRo{0%,60%{opacity:.35}61%,72%{opacity:1}76%,100%{opacity:.35}}
+@keyframes bdiTe{0%,75%{opacity:.35}76%,87%{opacity:1}91%,100%{opacity:.35}}
+@keyframes bdh{0%,9%{r:22px;opacity:.3}11%{r:42px;opacity:1}14%,24%{r:22px;opacity:.3}26%{r:42px;opacity:1}29%,39%{r:22px;opacity:.3}41%{r:42px;opacity:1}44%,54%{r:22px;opacity:.3}56%{r:42px;opacity:1}59%,69%{r:22px;opacity:.3}71%{r:42px;opacity:1}74%,84%{r:22px;opacity:.3}86%{r:42px;opacity:1}89%,100%{r:22px;opacity:.3}}
+@keyframes fdDot{0%{transform:translateY(0);opacity:0}3%{opacity:1}80%{transform:translateY(384px);opacity:1}88%,100%{transform:translateY(384px);opacity:0}}
+@keyframes fr0{0%,1%{opacity:.3}4%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes fr1{0%,13.8%{opacity:.3}16.8%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes fr2{0%,26.7%{opacity:.3}29.7%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes fr3{0%,39.5%{opacity:.3}42.5%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes fr4{0%,52.3%{opacity:.3}55.3%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes fr5{0%,65.2%{opacity:.3}68.2%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes fr6{0%,78%{opacity:.3}81%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes udDot{0%{transform:translateY(0);opacity:0}3%{opacity:1}80%{transform:translateY(-384px);opacity:1}88%,100%{transform:translateY(-384px);opacity:0}}
+@keyframes ur0{0%,1%{opacity:.3}4%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes ur1{0%,13.8%{opacity:.3}16.8%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes ur2{0%,26.7%{opacity:.3}29.7%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes ur3{0%,39.5%{opacity:.3}42.5%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes ur4{0%,52.3%{opacity:.3}55.3%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes ur5{0%,65.2%{opacity:.3}68.2%,88%{opacity:1}96%,100%{opacity:.3}}
+@keyframes ur6{0%,78%{opacity:.3}81%,88%{opacity:1}96%,100%{opacity:.3}}
+</style>
+</head>
+<body>
+<div id="viewport">
+<div id="stage">
+<section class="slide" data-i="0" aria-label="Chakras and the Galaxy Mosaic"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 64px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">A bridge from the chakras</div>
+<h1 style="position: absolute; left: 80px; top: 170px; width: 620px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 92px; line-height: 0.98; color: #F2EEE6">Chakras and the Galaxy Mosaic</h1>
+<p style="position: absolute; left: 80px; top: 400px; width: 520px; margin: 0; font-size: 24px; line-height: 1.45; color: #A9A3C2">If you know the chakras, you already know most of the shape of the Galaxy Mosaic method.</p>
+<svg width="660" height="660" viewBox="0 0 720 720" style="position: absolute; left: 600px; top: 30px" aria-hidden="true">
+<line x1="360" y1="110" x2="360" y2="620" stroke="#2E2A4D" stroke-width="2"></line>
+<g style="transform-box: view-box; transform-origin: 360px 365px; animation: spin 90s linear infinite">
+<path d="M360 365 A42.5 42.5 0 0 0 360 280 A85 85 0 0 0 360 450 A127.5 127.5 0 0 0 360 195 A170 170 0 0 0 360 535 A212.5 212.5 0 0 0 360 110 A255 255 0 0 0 360 620" fill="none" stroke="#8B8FFF" stroke-width="2.5" stroke-linecap="round" pathLength="1" stroke-dasharray="1" style="animation: draw 12s linear infinite"></path>
+</g>
+<circle cx="360" cy="110" r="13" fill="#C792FF"></circle>
+<circle cx="360" cy="195" r="13" fill="#8B8FFF"></circle>
+<circle cx="360" cy="280" r="13" fill="#3FA8F0"></circle>
+<circle cx="360" cy="365" r="16" fill="#4CC38A"></circle>
+<circle cx="360" cy="450" r="13" fill="#F5C842"></circle>
+<circle cx="360" cy="535" r="13" fill="#F2853A"></circle>
+<circle cx="360" cy="620" r="13" fill="#E5484D"></circle>
+</svg>
+</div></section>
+<section class="slide" data-i="1" aria-label="The chakras"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">The chakras · as we understand them</div>
+<h2 style="position: absolute; left: 80px; top: 80px; width: 560px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 76px; line-height: 1">These are the chakras</h2>
+<p style="position: absolute; left: 80px; top: 270px; width: 500px; margin: 0; font-size: 22px; line-height: 1.5; color: #A9A3C2">Seven energy centers along the spine, from the root at its base to the crown at the top of the head.</p>
+<p style="position: absolute; left: 80px; top: 380px; width: 500px; margin: 0; font-size: 22px; line-height: 1.5; color: #A9A3C2">People use them to find where energy is stuck and work on it, with breath, attention and movement, so it can rise freely, root to crown.</p>
+<div style="position: absolute; left: 700px; top: 96px; width: 500px; height: 532px">
+<div style="position: absolute; left: 213px; top: 26px; width: 2px; height: 456px; background: #2E2A4D"></div>
+<div style="position: absolute; left: 0; top: 0; width: 500px; height: 52px; display: grid; grid-template-columns: 190px 48px minmax(0, 1fr); align-items: center; animation: s6 9s ease-in-out infinite"><div style="text-align: right; font-size: 22px; font-weight: 600; padding-right: 16px">Crown</div><div style="width: 28px; height: 28px; border-radius: 50%; background: #C792FF; margin-left: 0"></div><div style="font-size: 18px; color: #A9A3C2">Sahasrara</div></div>
+<div style="position: absolute; left: 0; top: 76px; width: 500px; height: 52px; display: grid; grid-template-columns: 190px 48px minmax(0, 1fr); align-items: center; animation: s5 9s ease-in-out infinite"><div style="text-align: right; font-size: 22px; font-weight: 600; padding-right: 16px">Third eye</div><div style="width: 28px; height: 28px; border-radius: 50%; background: #8B8FFF"></div><div style="font-size: 18px; color: #A9A3C2">Ajna</div></div>
+<div style="position: absolute; left: 0; top: 152px; width: 500px; height: 52px; display: grid; grid-template-columns: 190px 48px minmax(0, 1fr); align-items: center; animation: s4 9s ease-in-out infinite"><div style="text-align: right; font-size: 22px; font-weight: 600; padding-right: 16px">Throat</div><div style="width: 28px; height: 28px; border-radius: 50%; background: #3FA8F0"></div><div style="font-size: 18px; color: #A9A3C2">Vishuddha</div></div>
+<div style="position: absolute; left: 0; top: 228px; width: 500px; height: 52px; display: grid; grid-template-columns: 190px 48px minmax(0, 1fr); align-items: center; animation: s3 9s ease-in-out infinite"><div style="text-align: right; font-size: 22px; font-weight: 600; padding-right: 16px">Heart</div><div style="width: 28px; height: 28px; border-radius: 50%; background: #4CC38A"></div><div style="font-size: 18px; color: #A9A3C2">Anahata</div></div>
+<div style="position: absolute; left: 0; top: 304px; width: 500px; height: 52px; display: grid; grid-template-columns: 190px 48px minmax(0, 1fr); align-items: center; animation: s2 9s ease-in-out infinite"><div style="text-align: right; font-size: 22px; font-weight: 600; padding-right: 16px">Solar plexus</div><div style="width: 28px; height: 28px; border-radius: 50%; background: #F5C842"></div><div style="font-size: 18px; color: #A9A3C2">Manipura</div></div>
+<div style="position: absolute; left: 0; top: 380px; width: 500px; height: 52px; display: grid; grid-template-columns: 190px 48px minmax(0, 1fr); align-items: center; animation: s1 9s ease-in-out infinite"><div style="text-align: right; font-size: 22px; font-weight: 600; padding-right: 16px">Sacral</div><div style="width: 28px; height: 28px; border-radius: 50%; background: #F2853A"></div><div style="font-size: 18px; color: #A9A3C2">Svadhisthana</div></div>
+<div style="position: absolute; left: 0; top: 456px; width: 500px; height: 52px; display: grid; grid-template-columns: 190px 48px minmax(0, 1fr); align-items: center; animation: s0 9s ease-in-out infinite"><div style="text-align: right; font-size: 22px; font-weight: 600; padding-right: 16px">Root</div><div style="width: 28px; height: 28px; border-radius: 50%; background: #E5484D"></div><div style="font-size: 18px; color: #A9A3C2">Muladhara</div></div>
+</div>
+</div></section>
+<section class="slide" data-i="2" aria-label="The Galaxy Mosaic"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">The framework</div>
+<h2 style="position: absolute; left: 80px; top: 84px; width: 560px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 76px; line-height: 1">The Galaxy Mosaic</h2>
+<p style="position: absolute; left: 80px; top: 196px; width: 540px; margin: 0; font-size: 21px; line-height: 1.5; color: #A9A3C2">How a person or a group runs itself.</p>
+<p style="position: absolute; left: 80px; top: 256px; width: 540px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.2">Like a seed, it grows with plans inside.</p>
+<div style="position: absolute; left: 80px; top: 380px; width: 540px; display: flex; flex-direction: column; gap: 18px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #8B8FFF">Galaxy</div><div style="font-size: 19px; line-height: 1.5; margin-top: 4px">It spirals out from the heart.</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F2853A">Mosaic</div><div style="font-size: 19px; line-height: 1.5; margin-top: 4px">The facets get built in any order.</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #4CC38A">Seven facets</div><div style="font-size: 19px; line-height: 1.5; margin-top: 4px">One for each chakra.</div></div>
+</div>
+<svg width="600" height="600" viewBox="0 0 720 720" style="position: absolute; left: 640px; top: 60px" aria-hidden="true">
+<g style="transform-box: view-box; transform-origin: 360px 365px; animation: seed 10s ease-out infinite">
+<path d="M360 365 A42.5 42.5 0 0 0 360 280 A85 85 0 0 0 360 450 A127.5 127.5 0 0 0 360 195 A170 170 0 0 0 360 535 A212.5 212.5 0 0 0 360 110 A255 255 0 0 0 360 620" fill="none" stroke="#8B8FFF" stroke-width="3" stroke-linecap="round" pathLength="1" stroke-dasharray="1" style="animation: seedDraw 10s ease-out infinite"></path>
+<circle cx="360" cy="365" r="18" fill="#4CC38A"></circle>
+<g style="animation: seedNode 10s ease-out infinite">
+<circle cx="360" cy="110" r="13" fill="#C792FF"></circle>
+<circle cx="360" cy="195" r="13" fill="#8B8FFF"></circle>
+<circle cx="360" cy="280" r="13" fill="#3FA8F0"></circle>
+<circle cx="360" cy="450" r="13" fill="#F5C842"></circle>
+<circle cx="360" cy="535" r="13" fill="#F2853A"></circle>
+<circle cx="360" cy="620" r="13" fill="#E5484D"></circle>
+</g>
+</g>
+</svg>
+</div></section>
+<section class="slide" data-i="3" aria-label="What we're going to do"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Chakras and the Galaxy Mosaic</div>
+<h2 style="position: absolute; left: 80px; top: 84px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 72px; line-height: 1.02">What we're going to do</h2>
+<p style="position: absolute; left: 80px; top: 186px; width: 1000px; margin: 0; font-size: 21px; line-height: 1.5; color: #A9A3C2">If you know the chakras, you already know the shape of this. We'll use them to show how to build something: yourself, or a group.</p>
+<ol style="position: absolute; left: 80px; top: 290px; width: 1120px; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 24px">
+<li style="display: flex; align-items: baseline; gap: 22px; animation: o1a 0.6s ease-out 0.2s both"><span style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 40px; font-weight: 600; color: #E5484D; width: 40px">1</span><span style="font-size: 26px; font-weight: 600">The chakras</span><span style="font-size: 19px; color: #A9A3C2">one at a time, rising from root to crown</span></li>
+<li style="display: flex; align-items: baseline; gap: 22px; animation: o1a 0.6s ease-out 0.5s both"><span style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 40px; font-weight: 600; color: #4CC38A; width: 40px">2</span><span style="font-size: 26px; font-weight: 600">Starting something</span><span style="font-size: 19px; color: #A9A3C2">begin at the heart, with what's wrong</span></li>
+<li style="display: flex; align-items: baseline; gap: 22px; animation: o1a 0.6s ease-out 0.8s both"><span style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 40px; font-weight: 600; color: #3FA8F0; width: 40px">3</span><span style="font-size: 26px; font-weight: 600">Building it</span><span style="font-size: 19px; color: #A9A3C2">every gap comes back to the heart</span></li>
+<li style="display: flex; align-items: baseline; gap: 22px; animation: o1a 0.6s ease-out 1.1s both"><span style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 40px; font-weight: 600; color: #C792FF; width: 40px">4</span><span style="font-size: 26px; font-weight: 600">Finishing it</span><span style="font-size: 19px; color: #A9A3C2">from the crown down, like creation</span></li>
+<li style="display: flex; align-items: baseline; gap: 22px; animation: o1a 0.6s ease-out 1.4s both"><span style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 40px; font-weight: 600; color: #F5C842; width: 40px">5</span><span style="font-size: 26px; font-weight: 600">Using it</span><span style="font-size: 19px; color: #A9A3C2">a good day, from the root up, like rising</span></li>
+</ol>
+</div></section>
+<section class="slide" data-i="4" aria-label="Root chakra"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Chakras · 1 of 7</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 80px; line-height: 1; color: #E5484D">Root</h2>
+<div style="position: absolute; left: 80px; top: 172px; font-size: 22px; color: #A9A3C2">Muladhara · "root support"</div>
+<div style="position: absolute; left: 80px; top: 232px; width: 720px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Location</div><div style="font-size: 20px; margin-top: 4px">Base of the spine</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Element</div><div style="font-size: 20px; margin-top: 4px">Earth</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Petals</div><div style="font-size: 20px; margin-top: 4px">4</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Seed sound</div><div style="font-size: 20px; margin-top: 4px">LAM</div></div>
+</div>
+<div style="position: absolute; left: 80px; top: 316px; width: 720px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Theme</div><div style="font-size: 21px; line-height: 1.45; margin-top: 6px">Grounding, survival, security. The foundation everything else stands on: having a body, a place, enough to live.</div></div>
+<div style="position: absolute; left: 80px; top: 452px; width: 720px; display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 16px">
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #E5484D">Rising · liberation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">Kundalini lies coiled here, three and a half turns. Rising starts by waking it. Earth dissolves into water as it climbs.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box; display: none"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #C792FF">Descending · creation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">The last step of creation. Water settles into earth, and what began as consciousness is now solid and real.</div></div>
+</div>
+<svg width="360" height="720" viewBox="0 0 360 720" style="position: absolute; left: 860px; top: 0" aria-hidden="true">
+<line x1="180" y1="110" x2="180" y2="620" stroke="#2E2A4D" stroke-width="2"></line>
+<circle cx="180" cy="110" r="9" fill="#C792FF" opacity="0.45"></circle>
+<circle cx="180" cy="195" r="9" fill="#8B8FFF" opacity="0.45"></circle>
+<circle cx="180" cy="280" r="9" fill="#3FA8F0" opacity="0.45"></circle>
+<circle cx="180" cy="365" r="9" fill="#4CC38A" opacity="0.45"></circle>
+<circle cx="180" cy="450" r="9" fill="#F5C842" opacity="0.45"></circle>
+<circle cx="180" cy="535" r="9" fill="#F2853A" opacity="0.45"></circle>
+<circle cx="180" cy="620" r="24" fill="none" stroke="#E5484D" stroke-width="2" style="animation: flare1 12s linear infinite"></circle>
+<circle cx="180" cy="620" r="18" fill="#E5484D"></circle>
+<text x="215" y="626" fill="#F2EEE6" font-size="18" font-weight="600" font-family="Inter, sans-serif">Root</text>
+<circle cx="180" cy="620" r="7" fill="#F2EEE6" style="animation: up 12s linear infinite"></circle>
+<circle cx="180" cy="110" r="7" fill="#C792FF" stroke="#F2EEE6" stroke-width="2" style="display: none"></circle>
+</svg>
+</div></section>
+<section class="slide" data-i="5" aria-label="Sacral chakra"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Chakras · 2 of 7</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 80px; line-height: 1; color: #F2853A">Sacral</h2>
+<div style="position: absolute; left: 80px; top: 172px; font-size: 22px; color: #A9A3C2">Svadhisthana · "one's own abode"</div>
+<div style="position: absolute; left: 80px; top: 232px; width: 720px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Location</div><div style="font-size: 20px; margin-top: 4px">Lower abdomen</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Element</div><div style="font-size: 20px; margin-top: 4px">Water</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Petals</div><div style="font-size: 20px; margin-top: 4px">6</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Seed sound</div><div style="font-size: 20px; margin-top: 4px">VAM</div></div>
+</div>
+<div style="position: absolute; left: 80px; top: 316px; width: 720px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Theme</div><div style="font-size: 21px; line-height: 1.45; margin-top: 6px">Desire, pleasure, creativity, emotion. Water: things that move, mix and flow between people.</div></div>
+<div style="position: absolute; left: 80px; top: 452px; width: 720px; display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 16px">
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #E5484D">Rising · liberation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">Energy rises from survival into feeling and creativity. Water dissolves into fire as it climbs.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box; display: none"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #C792FF">Descending · creation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">Fire cools into water. What was willed starts to take shape and flow.</div></div>
+</div>
+<svg width="360" height="720" viewBox="0 0 360 720" style="position: absolute; left: 860px; top: 0" aria-hidden="true">
+<line x1="180" y1="110" x2="180" y2="620" stroke="#2E2A4D" stroke-width="2"></line>
+<circle cx="180" cy="110" r="9" fill="#C792FF" opacity="0.45"></circle>
+<circle cx="180" cy="195" r="9" fill="#8B8FFF" opacity="0.45"></circle>
+<circle cx="180" cy="280" r="9" fill="#3FA8F0" opacity="0.45"></circle>
+<circle cx="180" cy="365" r="9" fill="#4CC38A" opacity="0.45"></circle>
+<circle cx="180" cy="450" r="9" fill="#F5C842" opacity="0.45"></circle>
+<circle cx="180" cy="620" r="9" fill="#E5484D" opacity="0.45"></circle>
+<circle cx="180" cy="535" r="24" fill="none" stroke="#F2853A" stroke-width="2" style="animation: flare2 12s linear infinite"></circle>
+<circle cx="180" cy="535" r="18" fill="#F2853A"></circle>
+<text x="215" y="541" fill="#F2EEE6" font-size="18" font-weight="600" font-family="Inter, sans-serif">Sacral</text>
+<circle cx="180" cy="620" r="7" fill="#F2EEE6" style="animation: up 12s linear infinite"></circle>
+<circle cx="180" cy="110" r="7" fill="#C792FF" stroke="#F2EEE6" stroke-width="2" style="display: none"></circle>
+</svg>
+</div></section>
+<section class="slide" data-i="6" aria-label="Solar plexus chakra"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Chakras · 3 of 7</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 80px; line-height: 1; color: #F5C842">Solar plexus</h2>
+<div style="position: absolute; left: 80px; top: 172px; font-size: 22px; color: #A9A3C2">Manipura · "city of jewels"</div>
+<div style="position: absolute; left: 80px; top: 232px; width: 720px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Location</div><div style="font-size: 20px; margin-top: 4px">Navel, upper belly</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Element</div><div style="font-size: 20px; margin-top: 4px">Fire</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Petals</div><div style="font-size: 20px; margin-top: 4px">10</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Seed sound</div><div style="font-size: 20px; margin-top: 4px">RAM</div></div>
+</div>
+<div style="position: absolute; left: 80px; top: 316px; width: 720px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Theme</div><div style="font-size: 21px; line-height: 1.45; margin-top: 6px">Will, power, transformation. Fire: the drive that turns intention into doing.</div></div>
+<div style="position: absolute; left: 80px; top: 452px; width: 720px; display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 16px">
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #E5484D">Rising · liberation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">Feeling becomes will and personal power. Fire dissolves into air as it climbs toward the heart.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box; display: none"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #C792FF">Descending · creation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">Air kindles fire. Intention turns into action.</div></div>
+</div>
+<svg width="360" height="720" viewBox="0 0 360 720" style="position: absolute; left: 860px; top: 0" aria-hidden="true">
+<line x1="180" y1="110" x2="180" y2="620" stroke="#2E2A4D" stroke-width="2"></line>
+<circle cx="180" cy="110" r="9" fill="#C792FF" opacity="0.45"></circle>
+<circle cx="180" cy="195" r="9" fill="#8B8FFF" opacity="0.45"></circle>
+<circle cx="180" cy="280" r="9" fill="#3FA8F0" opacity="0.45"></circle>
+<circle cx="180" cy="365" r="9" fill="#4CC38A" opacity="0.45"></circle>
+<circle cx="180" cy="535" r="9" fill="#F2853A" opacity="0.45"></circle>
+<circle cx="180" cy="620" r="9" fill="#E5484D" opacity="0.45"></circle>
+<circle cx="180" cy="450" r="24" fill="none" stroke="#F5C842" stroke-width="2" style="animation: flare3 12s linear infinite"></circle>
+<circle cx="180" cy="450" r="18" fill="#F5C842"></circle>
+<text x="215" y="456" fill="#F2EEE6" font-size="18" font-weight="600" font-family="Inter, sans-serif">Solar plexus</text>
+<circle cx="180" cy="620" r="7" fill="#F2EEE6" style="animation: up 12s linear infinite"></circle>
+<circle cx="180" cy="110" r="7" fill="#C792FF" stroke="#F2EEE6" stroke-width="2" style="display: none"></circle>
+</svg>
+</div></section>
+<section class="slide" data-i="7" aria-label="Heart chakra"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Chakras · 4 of 7</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 80px; line-height: 1; color: #4CC38A">Heart</h2>
+<div style="position: absolute; left: 80px; top: 172px; font-size: 22px; color: #A9A3C2">Anahata · "unstruck"</div>
+<div style="position: absolute; left: 80px; top: 232px; width: 720px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Location</div><div style="font-size: 20px; margin-top: 4px">Center of the chest</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Element</div><div style="font-size: 20px; margin-top: 4px">Air</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Petals</div><div style="font-size: 20px; margin-top: 4px">12</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Seed sound</div><div style="font-size: 20px; margin-top: 4px">YAM</div></div>
+</div>
+<div style="position: absolute; left: 80px; top: 316px; width: 720px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Theme</div><div style="font-size: 21px; line-height: 1.45; margin-top: 6px">Love, compassion, balance. The middle of the seven: three below, three above. The unstruck sound arises without two things hitting.</div></div>
+<div style="position: absolute; left: 80px; top: 452px; width: 720px; display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 16px">
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #E5484D">Rising · liberation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">Personal will opens into compassion. The second knot (Vishnu granthi) loosens here. Air dissolves into space.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box; display: none"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #C792FF">Descending · creation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">Space condenses into air. What was spoken becomes felt, just before it becomes action.</div></div>
+</div>
+<svg width="360" height="720" viewBox="0 0 360 720" style="position: absolute; left: 860px; top: 0" aria-hidden="true">
+<line x1="180" y1="110" x2="180" y2="620" stroke="#2E2A4D" stroke-width="2"></line>
+<circle cx="180" cy="110" r="9" fill="#C792FF" opacity="0.45"></circle>
+<circle cx="180" cy="195" r="9" fill="#8B8FFF" opacity="0.45"></circle>
+<circle cx="180" cy="280" r="9" fill="#3FA8F0" opacity="0.45"></circle>
+<circle cx="180" cy="450" r="9" fill="#F5C842" opacity="0.45"></circle>
+<circle cx="180" cy="535" r="9" fill="#F2853A" opacity="0.45"></circle>
+<circle cx="180" cy="620" r="9" fill="#E5484D" opacity="0.45"></circle>
+<circle cx="180" cy="365" r="24" fill="none" stroke="#4CC38A" stroke-width="2" style="animation: flare4 12s linear infinite"></circle>
+<circle cx="180" cy="365" r="18" fill="#4CC38A"></circle>
+<text x="215" y="371" fill="#F2EEE6" font-size="18" font-weight="600" font-family="Inter, sans-serif">Heart</text>
+<circle cx="180" cy="620" r="7" fill="#F2EEE6" style="animation: up 12s linear infinite"></circle>
+<circle cx="180" cy="110" r="7" fill="#C792FF" stroke="#F2EEE6" stroke-width="2" style="display: none"></circle>
+</svg>
+</div></section>
+<section class="slide" data-i="8" aria-label="Throat chakra"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Chakras · 5 of 7</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 80px; line-height: 1; color: #3FA8F0">Throat</h2>
+<div style="position: absolute; left: 80px; top: 172px; font-size: 22px; color: #A9A3C2">Vishuddha · "especially pure"</div>
+<div style="position: absolute; left: 80px; top: 232px; width: 720px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Location</div><div style="font-size: 20px; margin-top: 4px">Throat</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Element</div><div style="font-size: 20px; margin-top: 4px">Space (ether)</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Petals</div><div style="font-size: 20px; margin-top: 4px">16</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Seed sound</div><div style="font-size: 20px; margin-top: 4px">HAM</div></div>
+</div>
+<div style="position: absolute; left: 80px; top: 316px; width: 720px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Theme</div><div style="font-size: 21px; line-height: 1.45; margin-top: 6px">Expression, communication, speaking truth. The voice: where what's inside gets said out loud.</div></div>
+<div style="position: absolute; left: 80px; top: 452px; width: 720px; display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 16px">
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #E5484D">Rising · liberation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">Compassion finds its voice. The last element, space, dissolves into mind.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box; display: none"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #C792FF">Descending · creation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">Mind gives rise to space, the first element. Speech (Vak) is the first creative act: it names what will be.</div></div>
+</div>
+<svg width="360" height="720" viewBox="0 0 360 720" style="position: absolute; left: 860px; top: 0" aria-hidden="true">
+<line x1="180" y1="110" x2="180" y2="620" stroke="#2E2A4D" stroke-width="2"></line>
+<circle cx="180" cy="110" r="9" fill="#C792FF" opacity="0.45"></circle>
+<circle cx="180" cy="195" r="9" fill="#8B8FFF" opacity="0.45"></circle>
+<circle cx="180" cy="365" r="9" fill="#4CC38A" opacity="0.45"></circle>
+<circle cx="180" cy="450" r="9" fill="#F5C842" opacity="0.45"></circle>
+<circle cx="180" cy="535" r="9" fill="#F2853A" opacity="0.45"></circle>
+<circle cx="180" cy="620" r="9" fill="#E5484D" opacity="0.45"></circle>
+<circle cx="180" cy="280" r="24" fill="none" stroke="#3FA8F0" stroke-width="2" style="animation: flare5 12s linear infinite"></circle>
+<circle cx="180" cy="280" r="18" fill="#3FA8F0"></circle>
+<text x="215" y="286" fill="#F2EEE6" font-size="18" font-weight="600" font-family="Inter, sans-serif">Throat</text>
+<circle cx="180" cy="620" r="7" fill="#F2EEE6" style="animation: up 12s linear infinite"></circle>
+<circle cx="180" cy="110" r="7" fill="#C792FF" stroke="#F2EEE6" stroke-width="2" style="display: none"></circle>
+</svg>
+</div></section>
+<section class="slide" data-i="9" aria-label="Third eye chakra"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Chakras · 6 of 7</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 80px; line-height: 1; color: #8B8FFF">Third eye</h2>
+<div style="position: absolute; left: 80px; top: 172px; font-size: 22px; color: #A9A3C2">Ajna · "command" or "perceive"</div>
+<div style="position: absolute; left: 80px; top: 232px; width: 720px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Location</div><div style="font-size: 20px; margin-top: 4px">Between the brows</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Element</div><div style="font-size: 20px; margin-top: 4px">Mind, light</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Petals</div><div style="font-size: 20px; margin-top: 4px">2</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Seed sound</div><div style="font-size: 20px; margin-top: 4px">OM</div></div>
+</div>
+<div style="position: absolute; left: 80px; top: 316px; width: 720px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Theme</div><div style="font-size: 21px; line-height: 1.45; margin-top: 6px">Insight, intuition, seeing clearly. Where ida and pingala meet and the two sides become one view.</div></div>
+<div style="position: absolute; left: 80px; top: 452px; width: 720px; display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 16px">
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #E5484D">Rising · liberation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">The last knot (Rudra granthi) loosens. Mind dissolves, and only awareness is left to go on.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box; display: none"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #C792FF">Descending · creation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">Consciousness becomes mind. The first split: a knower and things to know.</div></div>
+</div>
+<svg width="360" height="720" viewBox="0 0 360 720" style="position: absolute; left: 860px; top: 0" aria-hidden="true">
+<line x1="180" y1="110" x2="180" y2="620" stroke="#2E2A4D" stroke-width="2"></line>
+<circle cx="180" cy="110" r="9" fill="#C792FF" opacity="0.45"></circle>
+<circle cx="180" cy="280" r="9" fill="#3FA8F0" opacity="0.45"></circle>
+<circle cx="180" cy="365" r="9" fill="#4CC38A" opacity="0.45"></circle>
+<circle cx="180" cy="450" r="9" fill="#F5C842" opacity="0.45"></circle>
+<circle cx="180" cy="535" r="9" fill="#F2853A" opacity="0.45"></circle>
+<circle cx="180" cy="620" r="9" fill="#E5484D" opacity="0.45"></circle>
+<circle cx="180" cy="195" r="24" fill="none" stroke="#8B8FFF" stroke-width="2" style="animation: flare6 12s linear infinite"></circle>
+<circle cx="180" cy="195" r="18" fill="#8B8FFF"></circle>
+<text x="215" y="201" fill="#F2EEE6" font-size="18" font-weight="600" font-family="Inter, sans-serif">Third eye</text>
+<circle cx="180" cy="620" r="7" fill="#F2EEE6" style="animation: up 12s linear infinite"></circle>
+<circle cx="180" cy="110" r="7" fill="#C792FF" stroke="#F2EEE6" stroke-width="2" style="display: none"></circle>
+</svg>
+</div></section>
+<section class="slide" data-i="10" aria-label="Crown chakra"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Chakras · 7 of 7</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 80px; line-height: 1; color: #C792FF">Crown</h2>
+<div style="position: absolute; left: 80px; top: 172px; font-size: 22px; color: #A9A3C2">Sahasrara · "thousand-petaled"</div>
+<div style="position: absolute; left: 80px; top: 232px; width: 720px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Location</div><div style="font-size: 20px; margin-top: 4px">Top of the head</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Element</div><div style="font-size: 20px; margin-top: 4px">Beyond the elements</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Petals</div><div style="font-size: 20px; margin-top: 4px">1,000</div></div>
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Seed sound</div><div style="font-size: 20px; margin-top: 4px">Silence</div></div>
+</div>
+<div style="position: absolute; left: 80px; top: 316px; width: 720px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">Theme</div><div style="font-size: 21px; line-height: 1.45; margin-top: 6px">Union, pure awareness. The individual and the whole stop being separate: the drop returns to the ocean.</div></div>
+<div style="position: absolute; left: 80px; top: 452px; width: 720px; display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 16px">
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #E5484D">Rising · liberation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">The journey ends. Kundalini (Shakti) meets Shiva, and the rising is complete in union.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px; height: 176px; box-sizing: border-box; display: none"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #C792FF">Descending · creation</div><div style="font-size: 17px; line-height: 1.5; margin-top: 8px">Creation begins here, as pure consciousness, before anything has a form.</div></div>
+</div>
+<svg width="360" height="720" viewBox="0 0 360 720" style="position: absolute; left: 860px; top: 0" aria-hidden="true">
+<line x1="180" y1="110" x2="180" y2="620" stroke="#2E2A4D" stroke-width="2"></line>
+<circle cx="180" cy="195" r="9" fill="#8B8FFF" opacity="0.45"></circle>
+<circle cx="180" cy="280" r="9" fill="#3FA8F0" opacity="0.45"></circle>
+<circle cx="180" cy="365" r="9" fill="#4CC38A" opacity="0.45"></circle>
+<circle cx="180" cy="450" r="9" fill="#F5C842" opacity="0.45"></circle>
+<circle cx="180" cy="535" r="9" fill="#F2853A" opacity="0.45"></circle>
+<circle cx="180" cy="620" r="9" fill="#E5484D" opacity="0.45"></circle>
+<circle cx="180" cy="110" r="24" fill="none" stroke="#C792FF" stroke-width="2" style="animation: flare7 12s linear infinite"></circle>
+<circle cx="180" cy="110" r="18" fill="#C792FF"></circle>
+<text x="215" y="116" fill="#F2EEE6" font-size="18" font-weight="600" font-family="Inter, sans-serif">Crown</text>
+<circle cx="180" cy="620" r="7" fill="#F2EEE6" style="animation: up 12s linear infinite"></circle>
+<circle cx="180" cy="110" r="7" fill="#C792FF" stroke="#F2EEE6" stroke-width="2" style="display: none"></circle>
+</svg>
+</div></section>
+<section class="slide" data-i="11" aria-label="How do you get started?"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Starting · a spiral out from the heart</div>
+<h2 style="position: absolute; left: 80px; top: 84px; width: 520px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 72px; line-height: 1.02">How do you get started?</h2>
+<p style="position: absolute; left: 80px; top: 260px; width: 480px; margin: 0; font-size: 21px; line-height: 1.5; color: #A9A3C2">Whatever you're building, you start the same way: from a problem, spiraling out through seven facets, one question each.</p>
+<p style="position: absolute; left: 80px; top: 420px; width: 480px; margin: 0; font-size: 21px; line-height: 1.5; color: #A9A3C2">Heart first, then one up, one down, two up, two down, three up, three down.</p>
+<ol style="position: absolute; left: 640px; top: 96px; width: 560px; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px">
+<li style="display: flex; align-items: center; gap: 16px; animation: t0a 0.6s ease-out 0.2s both"><span style="width: 34px; height: 34px; flex: none; border-radius: 50%; background: #4CC38A; color: #0D0B1E; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">1</span><span style="font-size: 22px; font-weight: 600">What's the problem?</span><span style="font-size: 16px; color: #A9A3C2">Exception</span></li>
+<li style="display: flex; align-items: center; gap: 16px; animation: t0a 0.6s ease-out 0.5s both"><span style="width: 34px; height: 34px; flex: none; border-radius: 50%; background: #3FA8F0; color: #0D0B1E; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">2</span><span style="font-size: 22px; font-weight: 600">What did you expect?</span><span style="font-size: 16px; color: #A9A3C2">Expectation</span></li>
+<li style="display: flex; align-items: center; gap: 16px; animation: t0a 0.6s ease-out 0.8s both"><span style="width: 34px; height: 34px; flex: none; border-radius: 50%; background: #F5C842; color: #0D0B1E; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</span><span style="font-size: 22px; font-weight: 600">What can you do about it?</span><span style="font-size: 16px; color: #A9A3C2">Acception</span></li>
+<li style="display: flex; align-items: center; gap: 16px; animation: t0a 0.6s ease-out 1.1s both"><span style="width: 34px; height: 34px; flex: none; border-radius: 50%; background: #8B8FFF; color: #0D0B1E; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">4</span><span style="font-size: 22px; font-weight: 600">What do you need to track?</span><span style="font-size: 16px; color: #A9A3C2">Enumeration</span></li>
+<li style="display: flex; align-items: center; gap: 16px; animation: t0a 0.6s ease-out 1.4s both"><span style="width: 34px; height: 34px; flex: none; border-radius: 50%; background: #F2853A; color: #0D0B1E; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">5</span><span style="font-size: 22px; font-weight: 600">How does it fit?</span><span style="font-size: 16px; color: #A9A3C2">Acceptation</span></li>
+<li style="display: flex; align-items: center; gap: 16px; animation: t0a 0.6s ease-out 1.7s both"><span style="width: 34px; height: 34px; flex: none; border-radius: 50%; background: #C792FF; color: #0D0B1E; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">6</span><span style="font-size: 22px; font-weight: 600">What would the commitments be?</span><span style="font-size: 16px; color: #A9A3C2">Affirmation</span></li>
+<li style="display: flex; align-items: center; gap: 16px; animation: t0a 0.6s ease-out 2s both"><span style="width: 34px; height: 34px; flex: none; border-radius: 50%; background: #E5484D; color: #0D0B1E; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">7</span><span style="font-size: 22px; font-weight: 600">Who holds it together?</span><span style="font-size: 16px; color: #A9A3C2">Organization</span></li>
+</ol>
+</div></section>
+<section class="slide" data-i="12" aria-label="Exception"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Starting · 1 of 7 · What's the problem?</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 76px; line-height: 1; color: #4CC38A">Exception</h2>
+<div style="position: absolute; left: 80px; top: 170px; width: 1120px; font-size: 24px; line-height: 1.4">When what you expected doesn't match what happened.</div>
+<div style="position: absolute; left: 80px; top: 240px; width: 540px; display: flex; flex-direction: column; gap: 20px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">What it is</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">The pivot of the spine. The three facets below it are what you do; the three above it are what you believe. Any problem, anywhere, comes in through this one door and gets recorded.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">The chainsaw story</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">Saturday arrives, and the chainsaw doesn't. That gap gets written down. It's an exception, and fixing it becomes work.</div></div>
+</div>
+<div style="position: absolute; left: 660px; top: 240px; width: 540px; box-sizing: border-box; border: 1px solid #2E2A4D; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 22px; height: 22px; border-radius: 50%; background: #4CC38A"></div><div style="font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A3C2">Compared to the heart chakra</div></div>
+<div style="animation: q0 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #4CC38A">The chakra</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Anahata, "unstruck": the middle of the seven. Balance, compassion, the still center.</div></div>
+<div style="animation: q1 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #4CC38A">This facet</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">The middle of the spine, where every mismatch lands.</div></div>
+<div style="animation: q2 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #4CC38A">Alike</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Both are the center, where the upper half and the lower half meet.</div></div>
+<div style="animation: q3 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F5C842">Different</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">The heart is unstruck. The exception is where reality strikes. It rings with dukkha, the friction of things not being right, until every facet is whole.</div></div>
+</div>
+</div></section>
+<section class="slide" data-i="13" aria-label="Expectation"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Starting · 2 of 7 · What did you expect?</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 76px; line-height: 1; color: #3FA8F0">Expectation</h2>
+<div style="position: absolute; left: 80px; top: 170px; width: 1120px; font-size: 24px; line-height: 1.4">What should happen, said out loud.</div>
+<div style="position: absolute; left: 80px; top: 240px; width: 540px; display: flex; flex-direction: column; gap: 20px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">What it is</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">A prediction you can check. It's stated up front so reality has something to be compared against. Without one, there's nothing to notice when things go wrong.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">The chainsaw story</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">"I'll have the chainsaw Saturday morning." That sentence is what made the empty driveway on Saturday an exception.</div></div>
+</div>
+<div style="position: absolute; left: 660px; top: 240px; width: 540px; box-sizing: border-box; border: 1px solid #2E2A4D; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 22px; height: 22px; border-radius: 50%; background: #3FA8F0"></div><div style="font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A3C2">Compared to the throat chakra</div></div>
+<div style="animation: q0 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #3FA8F0">The chakra</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Vishuddha: expression and speaking truth. The voice.</div></div>
+<div style="animation: q1 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #3FA8F0">This facet</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Saying what should be.</div></div>
+<div style="animation: q2 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #4CC38A">Alike</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Both are the voice: putting what's inside into words others can hear.</div></div>
+<div style="animation: q3 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F5C842">Different</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">The throat speaks truth. An expectation can turn out wrong, and that's the point: it's built to be checked.</div></div>
+</div>
+</div></section>
+<section class="slide" data-i="14" aria-label="Acception"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Starting · 3 of 7 · What can you do about it?</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 76px; line-height: 1; color: #F5C842">Acception</h2>
+<div style="position: absolute; left: 80px; top: 170px; width: 1120px; font-size: 24px; line-height: 1.4">One action, actually taken.</div>
+<div style="position: absolute; left: 80px; top: 240px; width: 540px; display: flex; flex-direction: column; gap: 20px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">What it is</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">The smallest unit of doing. Each one is recorded, so what actually happened can be seen and counted, not just what was planned.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">The chainsaw story</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">Call the holder and pick it up today. That single action is an acception.</div></div>
+</div>
+<div style="position: absolute; left: 660px; top: 240px; width: 540px; box-sizing: border-box; border: 1px solid #2E2A4D; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 22px; height: 22px; border-radius: 50%; background: #F5C842"></div><div style="font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A3C2">Compared to the solar plexus</div></div>
+<div style="animation: q0 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F5C842">The chakra</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Manipura: fire. Will and power, turning intention into doing.</div></div>
+<div style="animation: q1 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F5C842">This facet</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">The doing itself, one act at a time.</div></div>
+<div style="animation: q2 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #4CC38A">Alike</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Both are where will becomes action.</div></div>
+<div style="animation: q3 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F5C842">Different</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">The solar plexus is personal power. An acception is a single act the whole group can see.</div></div>
+</div>
+</div></section>
+<section class="slide" data-i="15" aria-label="Enumeration"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Starting · 4 of 7 · What do you need to track?</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 76px; line-height: 1; color: #8B8FFF">Enumeration</h2>
+<div style="position: absolute; left: 80px; top: 170px; width: 1120px; font-size: 24px; line-height: 1.4">Naming and cataloging the things that matter.</div>
+<div style="position: absolute; left: 80px; top: 240px; width: 540px; display: flex; flex-direction: column; gap: 20px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">What it is</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">The group's shared vocabulary: its terms. A term starts as a plain description and sharpens into exact details only as people need them to act.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">The chainsaw story</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">"Chainsaw," "reservation," "due date." Everyone means the same thing by each word, and each one is tracked. That's what makes the expectation checkable.</div></div>
+</div>
+<div style="position: absolute; left: 660px; top: 240px; width: 540px; box-sizing: border-box; border: 1px solid #2E2A4D; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 22px; height: 22px; border-radius: 50%; background: #8B8FFF"></div><div style="font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A3C2">Compared to the third eye</div></div>
+<div style="animation: q0 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #8B8FFF">The chakra</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Ajna: insight, seeing clearly. Two sides become one view.</div></div>
+<div style="animation: q1 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #8B8FFF">This facet</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Discovering what's there and giving it a name.</div></div>
+<div style="animation: q2 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #4CC38A">Alike</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Both are about seeing what's actually there.</div></div>
+<div style="animation: q3 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F5C842">Different</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Insight is private. Enumeration is written down and shared, so everyone sees the same thing.</div></div>
+</div>
+</div></section>
+<section class="slide" data-i="16" aria-label="Acceptation"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Starting · 5 of 7 · How does it fit?</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 76px; line-height: 1; color: #F2853A">Acceptation</h2>
+<div style="position: absolute; left: 80px; top: 170px; width: 1120px; font-size: 24px; line-height: 1.4">A workflow: a set of actions held together, and what feeds into what.</div>
+<div style="position: absolute; left: 80px; top: 240px; width: 540px; display: flex; flex-direction: column; gap: 20px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">What it is</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">Pipes and queues. One step's output is the next step's input. It's a story told as a workflow: who does what, in what order, and what happens next.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">The chainsaw story</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">Borrowing the chainsaw is a workflow. Someone requests it, the holder gets a reminder with a due date, it's handed off, it's returned, and it's back on the shelf.</div></div>
+</div>
+<div style="position: absolute; left: 660px; top: 240px; width: 540px; box-sizing: border-box; border: 1px solid #2E2A4D; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 22px; height: 22px; border-radius: 50%; background: #F2853A"></div><div style="font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A3C2">Compared to the sacral chakra</div></div>
+<div style="animation: q0 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F2853A">The chakra</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Svadhisthana: water. Desire, pleasure, creativity, flow.</div></div>
+<div style="animation: q1 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F2853A">This facet</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">The channels work flows through.</div></div>
+<div style="animation: q2 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #4CC38A">Alike</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Both are about flow: things moving, mixing, passing from one to the next.</div></div>
+<div style="animation: q3 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F5C842">Different</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">No counterpart for desire or pleasure. Acceptation carries the flow, not the wanting.</div></div>
+</div>
+</div></section>
+<section class="slide" data-i="17" aria-label="Affirmation"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Starting · 6 of 7 · What would the commitments be?</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 76px; line-height: 1; color: #C792FF">Affirmation</h2>
+<div style="position: absolute; left: 80px; top: 170px; width: 1120px; font-size: 24px; line-height: 1.4">A recorded commitment. Joining the whole.</div>
+<div style="position: absolute; left: 80px; top: 240px; width: 540px; display: flex; flex-direction: column; gap: 20px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">What it is</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">What each member promises. You can't have an organization until people commit; affirmations are those commitments.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">The chainsaw story</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">Each member affirms: "I'll answer a borrowing request within a day." Those promises are what the five neighbors hold each other to.</div></div>
+</div>
+<div style="position: absolute; left: 660px; top: 240px; width: 540px; box-sizing: border-box; border: 1px solid #2E2A4D; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 22px; height: 22px; border-radius: 50%; background: #C792FF"></div><div style="font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A3C2">Compared to the crown chakra</div></div>
+<div style="animation: q0 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #C792FF">The chakra</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Sahasrara: union. The self joins the whole.</div></div>
+<div style="animation: q1 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #C792FF">This facet</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Committing to the group and joining it.</div></div>
+<div style="animation: q2 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #4CC38A">Alike</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Both are joining something larger than yourself.</div></div>
+<div style="animation: q3 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F5C842">Different</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">It's union you can leave.</div></div>
+</div>
+</div></section>
+<section class="slide" data-i="18" aria-label="Organization"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Starting · 7 of 7 · Who holds it together?</div>
+<h2 style="position: absolute; left: 80px; top: 80px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 76px; line-height: 1; color: #E5484D">Organization</h2>
+<div style="position: absolute; left: 80px; top: 170px; width: 1120px; font-size: 24px; line-height: 1.4">The group itself: the people who've committed, and what they own and run together.</div>
+<div style="position: absolute; left: 80px; top: 240px; width: 540px; display: flex; flex-direction: column; gap: 20px">
+<div><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">What it is</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">An organization isn't there first. It's made of people who've committed to the same things. Once it exists, it holds up and supports each person who commits to it.</div></div>
+<div style="background: #17142E; border-radius: 14px; padding: 18px 20px"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">The chainsaw story</div><div style="font-size: 18px; line-height: 1.55; margin-top: 6px">The five neighbors own the chainsaw together, share the upkeep, and run the lending.</div></div>
+</div>
+<div style="position: absolute; left: 660px; top: 240px; width: 540px; box-sizing: border-box; border: 1px solid #2E2A4D; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 22px; height: 22px; border-radius: 50%; background: #E5484D"></div><div style="font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A3C2">Compared to the root chakra</div></div>
+<div style="animation: q0 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #E5484D">The chakra</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Muladhara: grounding and survival. The base that holds the body up.</div></div>
+<div style="animation: q1 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #E5484D">This facet</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">The group that holds each member up.</div></div>
+<div style="animation: q2 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #4CC38A">Alike</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">Both are the foundation. You stand on them, and everything above depends on them.</div></div>
+<div style="animation: q3 8s ease-out 1 both"><div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #F5C842">Different</div><div style="font-size: 17px; line-height: 1.5; margin-top: 3px">The root is your own body's base. An organization is built out of other people's commitments.</div></div>
+</div>
+</div></section>
+<section class="slide" data-i="19" aria-label="Starting: spiral out"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Starting · all seven together</div>
+<h2 style="position: absolute; left: 80px; top: 84px; width: 520px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 60px; line-height: 1.05">Starting: a spiral out from the heart</h2>
+<p style="position: absolute; left: 80px; top: 238px; width: 500px; margin: 0; font-size: 19px; line-height: 1.45; color: #A9A3C2">Heart, one up, one down, two up, two down, three up, three down.</p>
+<ol style="position: absolute; left: 80px; top: 304px; width: 500px; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 20px">
+<li style="display: flex; align-items: center; gap: 14px; animation: p0 10s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #4CC38A; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">1</span><span style="font-weight: 600">Exception</span><span style="color: #A9A3C2">· heart</span></li>
+<li style="display: flex; align-items: center; gap: 14px; animation: p1 10s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #3FA8F0; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">2</span><span style="font-weight: 600">Expectation</span><span style="color: #A9A3C2">· throat</span></li>
+<li style="display: flex; align-items: center; gap: 14px; animation: p2 10s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #F5C842; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</span><span style="font-weight: 600">Acception</span><span style="color: #A9A3C2">· solar plexus</span></li>
+<li style="display: flex; align-items: center; gap: 14px; animation: p3 10s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #8B8FFF; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">4</span><span style="font-weight: 600">Enumeration</span><span style="color: #A9A3C2">· third eye</span></li>
+<li style="display: flex; align-items: center; gap: 14px; animation: p4 10s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #F2853A; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">5</span><span style="font-weight: 600">Acceptation</span><span style="color: #A9A3C2">· sacral</span></li>
+<li style="display: flex; align-items: center; gap: 14px; animation: p5 10s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #C792FF; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">6</span><span style="font-weight: 600">Affirmation</span><span style="color: #A9A3C2">· crown</span></li>
+<li style="display: flex; align-items: center; gap: 14px; animation: p6 10s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #E5484D; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">7</span><span style="font-weight: 600">Organization</span><span style="color: #A9A3C2">· root</span></li>
+</ol>
+<p style="position: absolute; left: 80px; top: 628px; width: 520px; margin: 0; font-size: 17px; line-height: 1.45; color: #A9A3C2">That's the galaxy. The chakras climb a helix up the spine; the Mosaic starts in the middle and spirals outward.</p>
+<svg width="640" height="640" viewBox="0 0 720 720" style="position: absolute; left: 600px; top: 40px" aria-hidden="true">
+<line x1="360" y1="110" x2="360" y2="620" stroke="#2E2A4D" stroke-width="2"></line>
+<path d="M360 365 A42.5 42.5 0 0 0 360 280 A85 85 0 0 0 360 450 A127.5 127.5 0 0 0 360 195 A170 170 0 0 0 360 535 A212.5 212.5 0 0 0 360 110 A255 255 0 0 0 360 620" fill="none" stroke="#F2EEE6" stroke-opacity="0.7" stroke-width="2.5" stroke-linecap="round" pathLength="1" stroke-dasharray="1" style="animation: drawSpiral 10s linear infinite"></path>
+<g font-family="Inter, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#0D0B1E">
+<g style="animation: p0 10s linear infinite"><circle cx="360" cy="365" r="17" fill="#4CC38A"></circle><text x="360" y="370">1</text></g>
+<g style="animation: p1 10s linear infinite"><circle cx="360" cy="280" r="15" fill="#3FA8F0"></circle><text x="360" y="285">2</text></g>
+<g style="animation: p2 10s linear infinite"><circle cx="360" cy="450" r="15" fill="#F5C842"></circle><text x="360" y="455">3</text></g>
+<g style="animation: p3 10s linear infinite"><circle cx="360" cy="195" r="15" fill="#8B8FFF"></circle><text x="360" y="200">4</text></g>
+<g style="animation: p4 10s linear infinite"><circle cx="360" cy="535" r="15" fill="#F2853A"></circle><text x="360" y="540">5</text></g>
+<g style="animation: p5 10s linear infinite"><circle cx="360" cy="110" r="15" fill="#C792FF"></circle><text x="360" y="115">6</text></g>
+<g style="animation: p6 10s linear infinite"><circle cx="360" cy="620" r="15" fill="#E5484D"></circle><text x="360" y="625">7</text></g>
+</g>
+</svg>
+</div></section>
+<section class="slide" data-i="20" aria-label="Building: back to the heart"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 56px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Building · back to the heart</div>
+<h2 style="position: absolute; left: 80px; top: 84px; width: 520px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 60px; line-height: 1.05">Building: back to the heart</h2>
+<p style="position: absolute; left: 80px; top: 238px; width: 500px; margin: 0; font-size: 19px; line-height: 1.45; color: #A9A3C2">Work on any facet, in any order. When one falls short, it raises an exception.</p>
+<ol style="position: absolute; left: 80px; top: 304px; width: 500px; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 20px">
+<li style="display: flex; align-items: center; gap: 14px"><span style="width: 28px; height: 28px; border-radius: 50%; background: #4CC38A; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">1</span><span style="font-weight: 600">Exception</span><span style="color: #A9A3C2">· heart</span></li>
+<li style="display: flex; align-items: center; gap: 14px; animation: bdiTh 12s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #3FA8F0; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">2</span><span style="font-weight: 600">Expectation</span><span style="color: #A9A3C2">· throat</span></li>
+<li style="display: flex; align-items: center; gap: 14px; animation: bdiSo 12s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #F5C842; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</span><span style="font-weight: 600">Acception</span><span style="color: #A9A3C2">· solar plexus</span></li>
+<li style="display: flex; align-items: center; gap: 14px; animation: bdiTe 12s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #8B8FFF; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">4</span><span style="font-weight: 600">Enumeration</span><span style="color: #A9A3C2">· third eye</span></li>
+<li style="display: flex; align-items: center; gap: 14px; animation: bdiSa 12s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #F2853A; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">5</span><span style="font-weight: 600">Acceptation</span><span style="color: #A9A3C2">· sacral</span></li>
+<li style="display: flex; align-items: center; gap: 14px; animation: bdiCr 12s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #C792FF; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">6</span><span style="font-weight: 600">Affirmation</span><span style="color: #A9A3C2">· crown</span></li>
+<li style="display: flex; align-items: center; gap: 14px; animation: bdiRo 12s linear infinite"><span style="width: 28px; height: 28px; border-radius: 50%; background: #E5484D; color: #0D0B1E; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">7</span><span style="font-weight: 600">Organization</span><span style="color: #A9A3C2">· root</span></li>
+</ol>
+<p style="position: absolute; left: 80px; top: 628px; width: 520px; margin: 0; font-size: 17px; line-height: 1.45; color: #A9A3C2">Each exception interrupts straight to the heart. That friction is dukkha, and it's the work, until every facet is whole.</p>
+<svg width="640" height="640" viewBox="0 0 720 720" style="position: absolute; left: 600px; top: 40px" aria-hidden="true">
+<defs>
+<marker id="bdArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#A9A3C2"></path></marker>
+</defs>
+<line x1="360" y1="110" x2="360" y2="620" stroke="#2E2A4D" stroke-width="2"></line>
+<g fill="none" stroke-width="2" marker-end="url(#bdArrow)">
+<path d="M345 280 C288 280 288 365 341 365" stroke="#3FA8F0" style="animation: bdiTh 12s linear infinite"></path>
+<path d="M345 195 C232 195 232 365 341 365" stroke="#8B8FFF" style="animation: bdiTe 12s linear infinite"></path>
+<path d="M345 110 C175 110 175 365 341 365" stroke="#C792FF" style="animation: bdiCr 12s linear infinite"></path>
+<path d="M375 450 C432 450 432 365 379 365" stroke="#F5C842" style="animation: bdiSo 12s linear infinite"></path>
+<path d="M375 535 C488 535 488 365 379 365" stroke="#F2853A" style="animation: bdiSa 12s linear infinite"></path>
+<path d="M375 620 C545 620 545 365 379 365" stroke="#E5484D" style="animation: bdiRo 12s linear infinite"></path>
+</g>
+<g font-family="Inter, sans-serif" font-size="12" font-weight="600" letter-spacing="0.08em" fill="#A9A3C2">
+<text x="294" y="327" text-anchor="end">EXCEPT</text>
+<text x="252" y="284" text-anchor="end">EXCEPT</text>
+<text x="209" y="242" text-anchor="end">EXCEPT</text>
+<text x="426" y="412">EXCEPT</text>
+<text x="468" y="454">EXCEPT</text>
+<text x="511" y="497">EXCEPT</text>
+</g>
+<g fill="none" stroke-width="7" stroke-linecap="round" stroke-dasharray="0.2 2">
+<path d="M375 535 C488 535 488 365 379 365" pathLength="1" stroke="#F2853A" style="animation: bdcSa 12s ease-in infinite"></path>
+<path d="M345 280 C288 280 288 365 341 365" pathLength="1" stroke="#3FA8F0" style="animation: bdcTh 12s ease-in infinite"></path>
+<path d="M345 110 C175 110 175 365 341 365" pathLength="1" stroke="#C792FF" style="animation: bdcCr 12s ease-in infinite"></path>
+<path d="M375 450 C432 450 432 365 379 365" pathLength="1" stroke="#F5C842" style="animation: bdcSo 12s ease-in infinite"></path>
+<path d="M375 620 C545 620 545 365 379 365" pathLength="1" stroke="#E5484D" style="animation: bdcRo 12s ease-in infinite"></path>
+<path d="M345 195 C232 195 232 365 341 365" pathLength="1" stroke="#8B8FFF" style="animation: bdcTe 12s ease-in infinite"></path>
+</g>
+<circle cx="360" cy="365" r="22" fill="none" stroke="#4CC38A" stroke-width="3" style="animation: bdh 12s linear infinite"></circle>
+<g font-family="Inter, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#0D0B1E">
+<g><circle cx="360" cy="365" r="17" fill="#4CC38A"></circle><text x="360" y="370">1</text></g>
+<g style="animation: bdiTh 12s linear infinite"><circle cx="360" cy="280" r="15" fill="#3FA8F0"></circle><text x="360" y="285">2</text></g>
+<g style="animation: bdiSo 12s linear infinite"><circle cx="360" cy="450" r="15" fill="#F5C842"></circle><text x="360" y="455">3</text></g>
+<g style="animation: bdiTe 12s linear infinite"><circle cx="360" cy="195" r="15" fill="#8B8FFF"></circle><text x="360" y="200">4</text></g>
+<g style="animation: bdiSa 12s linear infinite"><circle cx="360" cy="535" r="15" fill="#F2853A"></circle><text x="360" y="540">5</text></g>
+<g style="animation: bdiCr 12s linear infinite"><circle cx="360" cy="110" r="15" fill="#C792FF"></circle><text x="360" y="115">6</text></g>
+<g style="animation: bdiRo 12s linear infinite"><circle cx="360" cy="620" r="15" fill="#E5484D"></circle><text x="360" y="625">7</text></g>
+</g>
+</svg>
+</div></section>
+<section class="slide" data-i="21" aria-label="Finishing: crown down"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 48px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Finishing · side by side</div>
+<h2 style="position: absolute; left: 80px; top: 72px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 52px; line-height: 1.05">Finishing: crown down</h2>
+<div style="position: absolute; left: 120px; top: 158px; width: 480px; text-align: right; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">The chakras · creation, descending</div>
+<div style="position: absolute; left: 680px; top: 158px; width: 520px; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">The facets · finishing</div>
+<div style="position: absolute; left: 639px; top: 220px; width: 2px; height: 384px; background: #2E2A4D"></div>
+<div style="position: absolute; left: 629px; top: 209px; width: 22px; height: 22px; border-radius: 50%; background: #C792FF"></div>
+<div style="position: absolute; left: 629px; top: 273px; width: 22px; height: 22px; border-radius: 50%; background: #8B8FFF"></div>
+<div style="position: absolute; left: 629px; top: 337px; width: 22px; height: 22px; border-radius: 50%; background: #3FA8F0"></div>
+<div style="position: absolute; left: 629px; top: 401px; width: 22px; height: 22px; border-radius: 50%; background: #4CC38A"></div>
+<div style="position: absolute; left: 629px; top: 465px; width: 22px; height: 22px; border-radius: 50%; background: #F5C842"></div>
+<div style="position: absolute; left: 629px; top: 529px; width: 22px; height: 22px; border-radius: 50%; background: #F2853A"></div>
+<div style="position: absolute; left: 629px; top: 593px; width: 22px; height: 22px; border-radius: 50%; background: #E5484D"></div>
+<div style="position: absolute; left: 634px; top: 214px; width: 12px; height: 12px; border-radius: 50%; background: #F2EEE6; box-shadow: 0 0 16px #F2EEE6; animation: fdDot 9s linear infinite"></div>
+<div style="position: absolute; left: 120px; top: 196px; width: 480px; text-align: right; animation: fr0 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Crown</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Pure consciousness, before any form</div></div>
+<div style="position: absolute; left: 120px; top: 260px; width: 480px; text-align: right; animation: fr1 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Third eye</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Becomes mind: a knower, and things to know</div></div>
+<div style="position: absolute; left: 120px; top: 324px; width: 480px; text-align: right; animation: fr2 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Throat</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Space: speech names what will be</div></div>
+<div style="position: absolute; left: 120px; top: 388px; width: 480px; text-align: right; animation: fr3 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Heart</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Air: what was spoken becomes felt</div></div>
+<div style="position: absolute; left: 120px; top: 452px; width: 480px; text-align: right; animation: fr4 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Solar plexus</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Fire: intention turns into action</div></div>
+<div style="position: absolute; left: 120px; top: 516px; width: 480px; text-align: right; animation: fr5 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Sacral</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Water: it takes shape and flows</div></div>
+<div style="position: absolute; left: 120px; top: 580px; width: 480px; text-align: right; animation: fr6 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Root</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Earth: solid and real</div></div>
+<div style="position: absolute; left: 680px; top: 196px; width: 520px; animation: fr0 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Affirmation</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">What are we committing to?</div></div>
+<div style="position: absolute; left: 680px; top: 260px; width: 520px; animation: fr1 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Enumeration</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">What will exist?</div></div>
+<div style="position: absolute; left: 680px; top: 324px; width: 520px; animation: fr2 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Expectation</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">What should happen?</div></div>
+<div style="position: absolute; left: 680px; top: 388px; width: 520px; animation: fr3 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Exception</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Does it hold up?</div></div>
+<div style="position: absolute; left: 680px; top: 452px; width: 520px; animation: fr4 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Acception</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Do it.</div></div>
+<div style="position: absolute; left: 680px; top: 516px; width: 520px; animation: fr5 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Acceptation</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">How does it flow?</div></div>
+<div style="position: absolute; left: 680px; top: 580px; width: 520px; animation: fr6 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Organization</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">It exists.</div></div>
+<p style="position: absolute; left: 80px; top: 648px; width: 1120px; margin: 0; text-align: center; font-size: 17px; color: #A9A3C2">Build in any order. Finish the way creation comes into the world: from the crown down to the root.</p>
+</div></section>
+<section class="slide" data-i="22" aria-label="Using: a good day"><div style="width: 1280px; height: 720px; position: relative; overflow: hidden; box-sizing: border-box; background: #0D0B1E; color: #F2EEE6; font-family: Inter, system-ui, sans-serif">
+<div style="position: absolute; left: 80px; top: 48px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #A9A3C2">Using · side by side</div>
+<h2 style="position: absolute; left: 80px; top: 72px; margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 52px; line-height: 1.05">Using: a good day, root up</h2>
+<div style="position: absolute; left: 120px; top: 158px; width: 480px; text-align: right; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">The chakras · liberation, rising</div>
+<div style="position: absolute; left: 680px; top: 158px; width: 520px; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A3C2">The facets · a group that works</div>
+<div style="position: absolute; left: 639px; top: 220px; width: 2px; height: 384px; background: #2E2A4D"></div>
+<div style="position: absolute; left: 629px; top: 209px; width: 22px; height: 22px; border-radius: 50%; background: #C792FF"></div>
+<div style="position: absolute; left: 629px; top: 273px; width: 22px; height: 22px; border-radius: 50%; background: #8B8FFF"></div>
+<div style="position: absolute; left: 629px; top: 337px; width: 22px; height: 22px; border-radius: 50%; background: #3FA8F0"></div>
+<div style="position: absolute; left: 629px; top: 401px; width: 22px; height: 22px; border-radius: 50%; background: #4CC38A"></div>
+<div style="position: absolute; left: 629px; top: 465px; width: 22px; height: 22px; border-radius: 50%; background: #F5C842"></div>
+<div style="position: absolute; left: 629px; top: 529px; width: 22px; height: 22px; border-radius: 50%; background: #F2853A"></div>
+<div style="position: absolute; left: 629px; top: 593px; width: 22px; height: 22px; border-radius: 50%; background: #E5484D"></div>
+<div style="position: absolute; left: 634px; top: 598px; width: 12px; height: 12px; border-radius: 50%; background: #F2EEE6; box-shadow: 0 0 16px #F2EEE6; animation: udDot 9s linear infinite"></div>
+<div style="position: absolute; left: 120px; top: 196px; width: 480px; text-align: right; animation: ur6 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Crown</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Union</div></div>
+<div style="position: absolute; left: 120px; top: 260px; width: 480px; text-align: right; animation: ur5 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Third eye</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Seeing clearly</div></div>
+<div style="position: absolute; left: 120px; top: 324px; width: 480px; text-align: right; animation: ur4 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Throat</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Compassion finds its voice</div></div>
+<div style="position: absolute; left: 120px; top: 388px; width: 480px; text-align: right; animation: ur3 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Heart</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Will opens into compassion</div></div>
+<div style="position: absolute; left: 120px; top: 452px; width: 480px; text-align: right; animation: ur2 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Solar plexus</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Feeling becomes will</div></div>
+<div style="position: absolute; left: 120px; top: 516px; width: 480px; text-align: right; animation: ur1 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Sacral</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Survival becomes feeling</div></div>
+<div style="position: absolute; left: 120px; top: 580px; width: 480px; text-align: right; animation: ur0 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Root</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Waking the coiled energy</div></div>
+<div style="position: absolute; left: 680px; top: 196px; width: 520px; animation: ur6 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Affirmation</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Fulfill it, and maybe enhance it</div></div>
+<div style="position: absolute; left: 680px; top: 260px; width: 520px; animation: ur5 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Enumeration</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Adjust what you track</div></div>
+<div style="position: absolute; left: 680px; top: 324px; width: 520px; animation: ur4 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Expectation</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Meet an expectation</div></div>
+<div style="position: absolute; left: 680px; top: 388px; width: 520px; animation: ur3 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Exception</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Address an exception</div></div>
+<div style="position: absolute; left: 680px; top: 452px; width: 520px; animation: ur2 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Acception</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Act on a task</div></div>
+<div style="position: absolute; left: 680px; top: 516px; width: 520px; animation: ur1 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Acceptation</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Go to your work queues</div></div>
+<div style="position: absolute; left: 680px; top: 580px; width: 520px; animation: ur0 9s linear infinite"><div style="font-size: 19px; font-weight: 600">Organization</div><div style="font-size: 15px; color: #A9A3C2; margin-top: 2px">Start with your infra</div></div>
+<p style="position: absolute; left: 80px; top: 648px; width: 1120px; margin: 0; text-align: center; font-size: 17px; color: #A9A3C2">The chakras rise once, and let the world go. A good day rises every day, and works in it.</p>
+</div></section>
+</div>
+<div id="start"><button class="primary" id="startBtn" type="button">Play</button><p>Narrated, about eight minutes. Arrow keys move between slides; space pauses.</p></div>
+</div>
+<div id="bar">
+<div id="progress" role="slider" aria-label="Slide position" tabindex="0"><span id="fill"></span></div>
+<div id="row">
+<div id="caption" aria-live="polite"></div>
+<div id="ctl">
+<div id="count"></div>
+<button type="button" id="back" aria-label="Previous slide">Back</button>
+<button type="button" class="primary" id="toggle">Play</button>
+<button type="button" id="next" aria-label="Next slide">Next</button>
+<button type="button" id="voice">Voice on</button>
+<button type="button" id="cc">Captions on</button>
+<select id="rate" aria-label="Speaking speed"><option value="0.85">Slow</option><option value="0.95" selected>Normal</option><option value="1.1">Fast</option></select>
+</div>
+</div>
+</div>
+<script>
+(function(){
+var NARRATION = ["Chakras and the Galaxy Mosaic. If you already know the chakras, you already know most of the shape of the Galaxy Mosaic method. This is a bridge from one to the other.", "These are the chakras, as we understand them: seven energy centers along the spine, from the root at its base to the crown at the top of the head. People use them to find where energy is stuck and work on it, with breath, attention and movement, so it can rise freely, root to crown.", "The Galaxy Mosaic is how a person or a group runs itself. Like a seed, it grows with plans inside. It's a galaxy because it spirals out from the heart, and a mosaic because the facets get built in any order. There are seven facets, one for each chakra.", "Here's what we're going to do. If you know the chakras, you already know the shape of this, and we'll use them to show how to build something: yourself, or a group. First, the chakras, one at a time, rising from root to crown. Then starting something: you begin at the heart, with what's wrong. Then building it, where every gap comes back to the heart. Then finishing it, from the crown down, like creation. And finally using it: a good day, from the root up, like rising.", "The root chakra, Muladhara, sits at the base of the spine. Its element is earth, and its theme is grounding, survival and security. Kundalini lies coiled here. Rising starts by waking it, and earth dissolves into water.", "The sacral chakra, Svadhisthana, sits in the lower abdomen. Its element is water: desire, pleasure, creativity and flow. Rising, energy moves from survival into feeling, and water dissolves into fire.", "The solar plexus, Manipura, the city of jewels. Its element is fire: will, power and transformation. Rising, feeling becomes will, and fire dissolves into air as it climbs toward the heart.", "The heart, Anahata, which means unstruck. It sits in the middle of the seven, three below and three above. Its element is air: love, compassion and balance. Rising, personal will opens into compassion.", "The throat, Vishuddha. Its element is space: expression, and speaking truth. Rising, compassion finds its voice, and space dissolves into mind.", "The third eye, Ajna, between the brows. Insight, and seeing clearly, where the two side channels meet. Rising, the last knot loosens and mind dissolves into awareness.", "The crown, Sahasrara, the thousand-petaled lotus. Beyond the elements: union and pure awareness. Rising, the journey ends in union.", "How do you get started? Whatever you're building, you start the same way: from a problem, spiraling out through seven facets, one question each. Heart first, then one up, one down, two up, two down, three up, three down.", "What's the problem? Start at the heart, with the exception: when what you expected doesn't match what happened. Saturday comes, and the chainsaw doesn't. Like the heart, it's the center. Unlike the heart, it's struck, not unstruck. It rings with dukkha until every facet is whole.", "What did you expect? One up, at the throat: the expectation, what should happen, said out loud. I'll have the chainsaw Saturday morning. Like the throat, it's the voice. But an expectation can turn out wrong, and that's the point. It's built to be checked.", "What can you do about it? One down, at the solar plexus: an acception, one action actually taken. Call the holder and pick it up today. Like the solar plexus, it's where will becomes action. Unlike it, it's a single act the whole group can see.", "What do you need to track? Two up, at the third eye: enumeration, naming the things that matter. Chainsaw, reservation, due date. Like the third eye, it's seeing what's actually there. Unlike insight, it's written down and shared.", "How does it fit? Two down, at the sacral: acceptation, a workflow. Request, reminder, handoff, return. Like the sacral chakra, it's about flow. Unlike it, there's no desire here. It carries the flow, not the wanting.", "What would the commitments be? Three up, at the crown: affirmation, a recorded commitment. Each neighbor affirms: I'll answer a borrowing request within a day. Like the crown, it's union. Unlike the crown, it's union you can leave.", "Who holds it together? Three down, at the root: organization. The five neighbors own the chainsaw together, share the upkeep, and run the lending. Like the root, it's the foundation. But it's built out of other people's commitments.", "All seven together. Starting spirals out from the heart. The chakras climb a helix up the spine. The Mosaic starts in the middle and spirals outward. That's the galaxy.", "Building: every gap fires back to the heart. Work on any facet, in any order. When one falls short, it raises an exception, and that interrupts straight to the heart. That friction is dukkha, and it is the work, until every facet is whole.", "Finishing, side by side. You can build in any order, but you finish from the crown down, the way the chakras describe creation. Pure consciousness becomes a commitment: what are we committing to? Mind becomes what will exist. Speech names what should happen. Air: does it hold up? Fire: do it. Water: how does it flow? And at the root, earth: it exists.", "Using, side by side. Everything so far was built on things going wrong. This is a good day, and it rises from the root, like the chakras. Start with your infra. Go to your work queues. Act on a task. Address an exception. Meet an expectation. Adjust what you track. Fulfill your affirmation, and maybe enhance it. The chakras rise once, and let the world go. A good day rises every day, and works in it."];
+var TITLES = ["Chakras and the Galaxy Mosaic", "The chakras", "The Galaxy Mosaic", "What we're going to do", "Root chakra", "Sacral chakra", "Solar plexus chakra", "Heart chakra", "Throat chakra", "Third eye chakra", "Crown chakra", "How do you get started?", "Exception", "Expectation", "Acception", "Enumeration", "Acceptation", "Affirmation", "Organization", "Starting: spiral out", "Building: back to the heart", "Finishing: crown down", "Using: a good day"];
+var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+var stage = document.getElementById('stage'), vp = document.getElementById('viewport');
+var cap = document.getElementById('caption'), count = document.getElementById('count'), fill = document.getElementById('fill');
+var tBtn = document.getElementById('toggle'), vBtn = document.getElementById('voice'), ccBtn = document.getElementById('cc'), rateSel = document.getElementById('rate');
+var start = document.getElementById('start');
+var idx = 0, playing = false, voice = true, token = 0, timer = null;
+var synth = null; try { synth = window.speechSynthesis || null; } catch(e) {}
+var chosen = null;
+function pickVoice(){ if(!synth) return; try { var vs = synth.getVoices(); chosen = vs.filter(function(v){return /^en(-|_)US/i.test(v.lang) && /natural|google|samantha|aria|jenny/i.test(v.name);})[0] || vs.filter(function(v){return /^en/i.test(v.lang);})[0] || null; } catch(e) {} }
+if (synth) { pickVoice(); try { synth.onvoiceschanged = pickVoice; } catch(e) {} }
+function fit(){ var s = Math.min(vp.clientWidth/1280, vp.clientHeight/720); stage.style.transform = 'translate(-50%,-50%) scale(' + s + ')'; }
+window.addEventListener('resize', fit); fit();
+function halt(){ token++; clearTimeout(timer); try { if (synth) synth.cancel(); } catch(e) {} }
+function show(i){
+  idx = Math.max(0, Math.min(slides.length-1, i));
+  slides.forEach(function(s,k){ s.classList.toggle('on', k===idx); });
+  cap.textContent = NARRATION[idx];
+  count.textContent = (idx+1) + ' / ' + slides.length;
+  fill.style.width = ((idx+1)/slides.length*100) + '%';
+  document.title = TITLES[idx] + ' · Chakras and the Galaxy Mosaic';
+}
+function go(i){ halt(); show(i); if (playing) run(); }
+function run(){
+  var my = ++token, text = NARRATION[idx], words = text.split(/\s+/).length;
+  var rate = parseFloat(rateSel.value) || 0.95;
+  var est = Math.max(8000, words * 420 / rate + 2500), finished = false;
+  function done(){
+    if (finished || my !== token) return; finished = true; clearTimeout(timer);
+    if (!playing) return;
+    if (idx < slides.length-1) { timer = setTimeout(function(){ if (my === token) go(idx+1); }, 1500); }
+    else { setPlaying(false); }
+  }
+  clearTimeout(timer);
+  if (voice && synth && typeof SpeechSynthesisUtterance !== 'undefined') {
+    try {
+      synth.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.rate = rate; if (chosen) u.voice = chosen;
+      u.onend = done; u.onerror = done;
+      setTimeout(function(){ if (my === token) synth.speak(u); }, 80);
+      timer = setTimeout(done, est * 1.8);
+    } catch(e) { timer = setTimeout(done, est); }
+  } else { timer = setTimeout(done, est); }
+}
+function setPlaying(p){ playing = p; tBtn.textContent = p ? 'Pause' : 'Play'; }
+function toggle(){ if (playing) { halt(); setPlaying(false); } else { start.classList.add('gone'); setPlaying(true); run(); } }
+document.getElementById('startBtn').addEventListener('click', function(){ start.classList.add('gone'); setPlaying(true); run(); });
+tBtn.addEventListener('click', toggle);
+document.getElementById('next').addEventListener('click', function(){ go(idx+1); });
+document.getElementById('back').addEventListener('click', function(){ go(idx-1); });
+vBtn.addEventListener('click', function(){ voice = !voice; vBtn.textContent = voice ? 'Voice on' : 'Voice off'; halt(); if (playing) run(); });
+ccBtn.addEventListener('click', function(){ var h = cap.classList.toggle('hide'); ccBtn.textContent = h ? 'Captions off' : 'Captions on'; });
+rateSel.addEventListener('change', function(){ if (playing) { halt(); run(); } });
+document.getElementById('progress').addEventListener('click', function(e){ var r = this.getBoundingClientRect(); go(Math.floor((e.clientX - r.left) / r.width * slides.length)); });
+document.addEventListener('keydown', function(e){
+  if (e.target && (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT')) return;
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); go(idx+1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(idx-1); }
+  else if (e.key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); toggle(); }
+  else if (e.key === 'Home') { go(0); } else if (e.key === 'End') { go(slides.length-1); }
+});
+var h = parseInt((location.hash || '').replace('#',''), 10); show(isNaN(h) ? 0 : h-1);
+window.addEventListener('hashchange', function(){ var n = parseInt(location.hash.replace('#',''),10); if (!isNaN(n)) go(n-1); });
+})();
+</script>
+</body>
+</html>
