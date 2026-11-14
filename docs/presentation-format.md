@@ -56,7 +56,7 @@ These are the only allowed sizes.
 - Green = creation
 - Blue = completion
 - Yellow = execution
-- Red = exception
+- Red = construction
 - Sparks are red, and turn yellow in a Bolt Bucket.
 - Rods are orange triangles pointing up.
 
