@@ -1,12 +1,6 @@
 # Bolt: Presentation Animation Format
 
-The standard for every Unifist Unum presentation. Slide 1 of the Logical Flow deck is the gold standard. Same is same: anything built twice is built by the generator, never by hand.
-
-## Source and build
-
-- **One source:** `deck.json` holds every slide: its text, roles and timings.
-- **One generator** builds both the Design canvas and the one-pager from `deck.json`.
-- **Sync** = pull Gaf's canvas edits back into `deck.json` first, then build. Never regenerate over canvas edits.
+The standard for every Unifist Unum presentation. Slide 1 of the Logical Flow deck is the gold standard. Same is same: anything built twice is generated, never built by hand.
 
 ## Slides
 
@@ -51,6 +45,21 @@ These are the only allowed sizes.
 - A Bucket snaps to that grid: one empty column from its neighbors, lined up with the top row.
 - The gap from a label to a Bucket's border equals the gap from a label to its squares.
 
+## Levels
+
+- **Cumulus:** Buckets hold separate squares, one per item.
+- **Lightning:** Buckets are bars, 96px wide, 10px per Scat, count on top, name below.
+- **Thunder:** numbers only.
+
+## Color
+
+- Green = creation
+- Blue = completion
+- Yellow = execution
+- Red = exception
+- Sparks are red, and turn yellow in a Bolt Bucket.
+- Rods are orange triangles pointing up.
+
 ## Behavior
 
 - **Explain before doing:** a caption comes before any motion.
@@ -71,7 +80,7 @@ These rules come from the editing outage on 2026-11-14.
 1. **Never write the canvas layout file (`canvas.json`) from scratch.** Read the editor's own copy and change only the keys needed.
 2. **Publish in batches,** not once per tweak, and never over a canvas Gaf is editing without reading it first.
 3. **Sync before build.** Gaf's edits in the canvas are the source of truth for text.
-4. **If editing breaks, run the template check first** (Claude does this, not Gaf). Make a template canvas and confirm it edits. If the template edits and the deck doesn't, rebuild the deck into a fresh canvas from `deck.json`.
+4. **If editing breaks, run the template check first** (Claude does this, not Gaf). Make a template canvas and confirm it edits. If the template edits and the deck doesn't, rebuild the deck into a fresh canvas.
 
 ## Rod: when something breaks
 
