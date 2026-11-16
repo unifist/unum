@@ -84,6 +84,7 @@ These rules come from the editing outage on 2026-11-14.
 2. **Publish in batches,** not once per tweak, and never over a canvas Gaf is editing without reading it first.
 3. **Sync before build.** Gaf's edits in the canvas are the source of truth for text.
 4. **If editing breaks, run the template check first** (Claude does this, not Gaf). Make a template canvas and confirm it edits. If the template edits and the deck doesn't, rebuild the deck into a fresh canvas.
+5. **Replace, don't append.** Every change starts by finding what it replaces and deleting that first. Builds regenerate from source, never pile onto the last output. A fix isn't done until nothing old remains.
 
 ## Rod: when something breaks
 
