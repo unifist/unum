@@ -67,12 +67,13 @@ These are the only allowed sizes.
 - **Explain before doing:** a caption comes before any motion.
 - **Constant count:** when items move, the number on screen stays the same.
 - **Buckets first:** every Bucket is shown before anything is routed into it.
-- **Spine:** pieces stay grey until mentioned, then light white.
+- **Spine:** facets stay grey until mentioned, then light white.
 
 ## Content
 
 - Text is Gaf's word for word, with only typos fixed.
 - Terms are capitalized.
+- Steps always include the Flush: searching or Bucketing costs a step per Scat, plus one step for the Flush.
 - Nothing invented: no captions, numbers or labels Gaf didn't give or approve.
 
 ## Canvas care
