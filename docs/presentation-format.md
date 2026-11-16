@@ -53,11 +53,12 @@ These are the only allowed sizes.
 
 ## Color
 
-- Green = creation
-- Red = error
-- Orange = repair
+- Green = growth
+- Red = failure
+- Orange = action
 - Blue = completion
-- Yellow = execution
+- Yellow = process
+- Purple = harvest
 - Sparks are red, and turn yellow in a Bolt Bucket.
 - Rods are orange triangles pointing up.
 
